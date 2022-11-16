@@ -64,12 +64,7 @@ int main(void)
 return 0;
 }
 
-//commandes internes
-
-
-// pas forcément besoin de parser la commande, car si commande externe on utilise exec
-// donc on donne juste le tableau d'argument et exec se débrouille avec
-// traitement nécessaire seulement pour commandes internes
+//fonctions de formattage
 command* command_formatting(char* user_prompt)
 {
 	//Création de la commande
@@ -130,6 +125,7 @@ int get_number_of_arguments(char* user_prompt)
 	return number_of_arguments;
 }
 
+//affichage du prompt (a compléter)
 char* make_prompt(int result, char* pwd)
 {
 	char* prompt;
