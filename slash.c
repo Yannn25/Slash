@@ -46,6 +46,8 @@ int main(void)
 			printf("%s\n", user_command -> arguments[i]);
 		}
 		printf("%d\n", user_command -> number_of_args);
+
+		//à modifier (juste pour tester)
 		if(strcmp(user_command -> arguments[0], "exit") == 0)
 		{
 			exit(strtol(user_command -> arguments[1], NULL, 10));
