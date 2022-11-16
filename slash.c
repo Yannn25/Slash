@@ -26,7 +26,8 @@ int main(void)
 {
 	// initialisation
 	int proc;
-	int result = 0;
+	// valeur de retour de la dernière commande exécutée
+	int ret_val = 0;
 	rl_outstream = stderr;
 
 	// boucle principale
@@ -37,8 +38,13 @@ int main(void)
 		printf("prompt = %s\n", prompt);
 		add_history(prompt);
 
-		//On vérifie si l'utilisateur a saisi une commande interne
+		// si signal ctrl-d reçu, on quitte (à remanier, juste pour tester)
+		if(prompt == NULL)
+		{
+			exit(ret_val);
+		}
 
+		//On vérifie si l'utilisateur a saisi une commande interne
 		command* user_command = command_formatting(erase_whitespaces(prompt));
 		
 		for(int i = 0; i < user_command -> number_of_args; i++)
