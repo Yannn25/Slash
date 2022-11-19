@@ -8,6 +8,7 @@
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
 
+//Commande utilisateur
 typedef struct command
 {
 	char** arguments;
@@ -15,19 +16,42 @@ typedef struct command
 } command;
 
 //Commandes internes
+typedef struct internal_command
+{
+	char* command_name;
+	int (*internal_function)(command*);
+} internal_command;
 
-//Shell
+// execution commandes internes
+int execute(command*);
+
+//commandes internes
+int cd_slash(command*);
+int pwd_slash(command*);
+int exit_slash(command*);
+
+//traitement ligne de commande
 command* command_formatting(char* prompt);
 char* make_prompt(int result, char* pwd);
 int get_number_of_arguments(char* user_prompt);
 char* erase_whitespaces(char* user_prompt);
 
+//Commandes disponibles dans slash
+const internal_command internal_commands[] = 
+{
+	{"exit", &exit_slash},
+	{"cd", &cd_slash},
+	{"pwd", &pwd_slash}
+};
+
+// paramètrage
+const int number_of_internal_commands = sizeof(internal_commands) / sizeof(internal_command);
+int last_return_value = 0;
+
 int main(void)
 {
 	// initialisation
 	int proc;
-	// valeur de retour de la dernière commande exécutée
-	int ret_val = 0;
 	rl_outstream = stderr;
 
 	// boucle principale
@@ -38,28 +62,13 @@ int main(void)
 		printf("prompt = %s\n", prompt);
 		add_history(prompt);
 
-		// si signal ctrl-d reçu, on quitte (à remanier, juste pour tester)
-		if(prompt == NULL)
-		{
-			exit(ret_val);
-		}
-
 		//On vérifie si l'utilisateur a saisi une commande interne
-		command* user_command = command_formatting(erase_whitespaces(prompt));
-		
-		for(int i = 0; i < user_command -> number_of_args; i++)
-		{
-			printf("%s\n", user_command -> arguments[i]);
-		}
-		printf("%d\n", user_command -> number_of_args);
-
-		//à modifier (juste pour tester)
-		if(strcmp(user_command -> arguments[0], "exit") == 0)
-		{
-			exit(strtol(user_command -> arguments[1], NULL, 10));
-		}
+		command* user_command = command_formatting(prompt);
+		// Lancement de la commande utilisateur
+		last_return_value = execute(user_command);
 
 		/* Sinon, on vérifie si l'utilisateur a saisi une commande externe
+		(à mettre plutot dans la fct execute)
 		if((proc = fork()) == 0)
 		{
 			execl("/bin/pwd", "pwd", NULL);
@@ -72,9 +81,100 @@ int main(void)
 return 0;
 }
 
+// execution commandes internes
+int execute(command* user_command)
+{
+	//Gestion du CTRL-D
+	if(user_command == NULL)
+	{
+		exit_slash(user_command);
+	}
+
+	int i;
+	for(i = 0; i < number_of_internal_commands; i++)
+	{
+		if(strcmp(user_command -> arguments[0], internal_commands[i].command_name) == 0)
+		{
+			return (*(internal_commands[i].internal_function))(user_command);
+		}
+	}
+
+	return -1;
+}
+
+//Commandes internes
+// à compléter
+int cd_slash(command* user_command)
+{
+	if(user_command -> number_of_args > 3)
+	{
+		printf("usage: cd [-L | -P] [ref | -]\n");
+		return 1;
+	}
+	return 0;
+}
+
+//à compléter
+int pwd_slash(command* user_command)
+{
+	int nb_args = user_command -> number_of_args;
+	if(user_command -> number_of_args > 2)
+	{
+		printf("usage: pwd [-L | -P]\n");
+		return 1;
+	}
+
+	char** args = user_command -> arguments;
+	//Gérer argument
+	//Cas par défaut (-L)
+	if(args[1] == NULL)
+	{
+		args[1] = "-L";
+	}
+
+	//pwd physique
+	if(strcmp(args[1], "-P") == 0)
+	{
+		printf("Current directory : %s\n", getenv("PWD"));
+		return 0;
+	} 
+
+	//pwd logique (à compléter)
+	if(strcmp(args[1], "-L") == 0)
+	{
+		printf("à compléter\n");
+		return 0;
+	}
+
+	printf("usage: pwd [-L | -P]\n");
+	return 1;
+}
+
+int exit_slash(command* user_command)
+{
+	if(user_command == NULL) exit(last_return_value);
+	if(user_command -> number_of_args > 2)
+	{
+		printf("usage: exit [val]\n");
+		return 1;
+	}
+
+	// (à ajouter) tester la valeur de retour de strtol, gérer les cas où l'argument est invalide
+	exit(strtol(user_command -> arguments[1], NULL, 10));
+}
+
 //fonctions de formattage
 command* command_formatting(char* user_prompt)
 {
+	// si CTRL-D
+	if(user_prompt == NULL)
+	{
+		return NULL;
+	}
+
+	// On enlève les espaces au début et à la fin
+	user_prompt = erase_whitespaces(user_prompt);
+
 	//Création de la commande
 	command* formatted_command = malloc(sizeof(command));
 	int number_of_arguments = get_number_of_arguments(user_prompt);
