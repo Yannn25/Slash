@@ -14,6 +14,10 @@ typedef struct internal_command
 	int (*internal_function)(command*);
 } internal_command;
 
+// maj pwd
+char* update_pwd(char* pwd, char* option, char* reference);
+char* get_last_folder(char* logical_pwd);
+char* delete_last_folder(char* logical_pwd);
 
 // execution commandes internes
 int execute(command*);
