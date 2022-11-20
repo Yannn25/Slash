@@ -1,6 +1,6 @@
 #include "include/prompt_formatting.h"
 
-//fonctions de formattage
+//fonctions de formatage
 command* command_formatting(char* user_prompt)
 {
 	// si CTRL-D
