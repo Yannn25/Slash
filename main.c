@@ -8,24 +8,22 @@
 #include "include/internal_functions.h"
 #include "include/global.h"
 
-#define MAX_ARGS_NUMBER 4096
-#define MAX_ARGS_STRLEN 4096
-
 // paramètrage des variables globales
 int last_return_value = 0;
+char logical_pwd[MAX_PWD_LENGTH] = {0};
 
-int main(void)
+int main(void) 
 {
 	// initialisation
 	int proc;
 	rl_outstream = stderr;
+	strcpy(logical_pwd, getenv("PWD"));
 
 	// boucle principale
 	while(1)
 	{
 		// Prompt Slash
 		char* prompt = readline("$ ");
-		printf("prompt = %s\n", prompt);
 		add_history(prompt);
 
 		//On vérifie si l'utilisateur a saisi une commande interne
