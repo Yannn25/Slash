@@ -1,4 +1,6 @@
 #include "include/prompt_formatting.h"
+#include <stdio.h>
+
 
 //fonctions de formatage
 command* command_formatting(char* user_prompt)
@@ -73,7 +75,27 @@ int get_number_of_arguments(char* user_prompt)
 //affichage du prompt (a compléter)
 char* make_prompt(int result, char* pwd)
 {
-	char* prompt;
+	char *prompt = malloc(MAX_CHAR_PROMPT);
 
-return prompt;
+	//Gestion des 30 char
+
+	//tentative avec couleur
+	switch (result)
+	{
+	case 0:
+		sprintf(prompt, "\033[32m[%d]\033[36m %s\033[00m$ ", result, pwd);
+		break;
+	case 1 :
+		sprintf(prompt, "\033[91m[%d]\033[36m %s\033[00m$ ", result, pwd);
+		break;
+	//Cas d'un SIG
+	//case
+
+
+	default:
+		sprintf(prompt, "\033[32m[%d]\033[36m %s\033[00m$ ", result, pwd);
+		break;
+	}	
+	return prompt;
 }
+
