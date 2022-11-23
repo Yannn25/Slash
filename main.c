@@ -9,8 +9,9 @@
 #include "include/global.h"
 
 // paramètrage des variables globales
-int last_return_value = 0;
+int last_return_value = 0;//mettre a 1 pour tester l'affichage du prompt avec erreur
 char logical_pwd[MAX_PWD_LENGTH] = {0};
+command* user_command;
 
 int main(void) 
 {
@@ -23,13 +24,15 @@ int main(void)
 	while(1)
 	{
 		// Prompt Slash
-		char* prompt = readline("$ ");
-		add_history(prompt);
+		char* prompt = readline(make_prompt(last_return_value,logical_pwd));
+		if(strlen(prompt) > 0)
+			add_history(prompt);
 
 		//On vérifie si l'utilisateur a saisi une commande interne
-		command* user_command = command_formatting(prompt);
+		user_command = command_formatting(prompt);
 		// Lancement de la commande utilisateur
 		last_return_value = execute(user_command);
+		//char *lrv = ito
 
 		/* Sinon, on vérifie si l'utilisateur a saisi une commande externe
 		(à mettre plutot dans la fct execute)
@@ -38,7 +41,7 @@ int main(void)
 			execl("/bin/pwd", "pwd", NULL);
 		}
 		*/
-
+		
 		// si ni l'un ni l'autre, message d'erreur et on boucle
 	}
 
