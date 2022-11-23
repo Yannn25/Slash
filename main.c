@@ -9,7 +9,7 @@
 #include "include/global.h"
 
 // paramètrage des variables globales
-int last_return_value = 1;
+int last_return_value = 0;//mettre a 1 pour tester l'affichage du prompt avec erreur
 char logical_pwd[MAX_PWD_LENGTH] = {0};
 command* user_command;
 

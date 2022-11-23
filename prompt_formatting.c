@@ -76,24 +76,29 @@ int get_number_of_arguments(char* user_prompt)
 char* make_prompt(int result, char* pwd)
 {
 	char *prompt = malloc(MAX_CHAR_PROMPT);
+	//char *cop_pwd = pwd; // précaution au vu  
 
 	//Gestion des 30 char
-
+	if(strlen(pwd) > MAX_CHAR_PROMPT - 5) {
+		char* new_pwd = malloc(26);
+  		strcpy(new_pwd, "...");
+  		strncat(new_pwd, pwd + (strlen(pwd) - 23) + 1, 26);
+  		pwd = new_pwd;
+	}
 	//tentative avec couleur
-	switch (result)
-	{
+	switch (result) {
 	case 0:
-		sprintf(prompt, "\033[32m[%d]\033[36m %s\033[00m$ ", result, pwd);
+		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
 		break;
 	case 1 :
-		sprintf(prompt, "\033[91m[%d]\033[36m %s\033[00m$ ", result, pwd);
+		sprintf(prompt, "\001\033[91m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
 		break;
-	//Cas d'un SIG
-	//case
+	//Cas des SIGNAUX (A traiter)
+	//case : break;
 
 
 	default:
-		sprintf(prompt, "\033[32m[%d]\033[36m %s\033[00m$ ", result, pwd);
+		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
 		break;
 	}	
 	return prompt;
