@@ -26,6 +26,7 @@ int main(void)
 	{
 		// Prompt Slash
 		char* prompt = readline(make_prompt(last_return_value,logical_pwd));
+		//char* prompt = readline("$> ");
 		if(strlen(prompt) > 0)
 			add_history(prompt);
 
@@ -33,7 +34,7 @@ int main(void)
 		user_command = command_formatting(prompt);
 		// Lancement de la commande utilisateur
 		last_return_value = execute(user_command);
-		//char *lrv = ito
+		
 
 		/* Sinon, on vérifie si l'utilisateur a saisi une commande externe
 		(à mettre plutot dans la fct execute)

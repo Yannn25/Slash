@@ -56,7 +56,9 @@ int cd_slash(command* user_command)
 	{
         //option - seul
         if(strcmp(args[1], "-") == 0) {
-            strcpy(reference, getenv("OLDPWD"));
+            strcpy(option, "-");
+           // strcpy(reference, getenv("OLDPWD"));
+           strcpy(reference,old_pwd);
         }
 		// option -P en argument
 		if(strcmp(args[1], "-P") == 0)
@@ -83,12 +85,17 @@ int cd_slash(command* user_command)
 	}
 	
 	printf("commande : cd %s %s\n", option, reference);
-
+    printf("getenv oldpwd : %s\n", getenv("OLDPWD"));
 
     char symlink_path[256] = {0};
     int ret = 0;
 
-
+    //cd - et maj de oldpwd
+    if (strcmp(option, "-") == 0) {
+        strcpy(reference, getenv("OLDPWD"));
+        strcpy(logical_pwd,reference);
+        printf("%s", reference);
+    }
 
     
 
@@ -111,6 +118,8 @@ int cd_slash(command* user_command)
             strcat(logical_pwd, reference);
         }
     }
+    
+
     // cd logique, pas ..
     else if(strcmp(option, "-L") == 0 && strcmp(reference, "..") != 0)
     {
@@ -140,6 +149,7 @@ int cd_slash(command* user_command)
     }
 
 	printf("retour cd : %d\n", chdir(logical_pwd));
+
     
     //strcpy(logical_pwd, update_pwd(logical_pwd, option, reference));
     //printf("getenv: %s\n", getenv("PWD"));
