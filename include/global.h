@@ -6,6 +6,7 @@
 #define MAX_PWD_LENGTH 256
 
 extern int last_return_value;
+extern char old_logical_pwd[MAX_PWD_LENGTH];
 extern char logical_pwd[MAX_PWD_LENGTH];
 
 #endif
