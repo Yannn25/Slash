@@ -1,16 +1,8 @@
 #include "include/prompt_formatting.h"
-#include <stdio.h>
-
 
 //fonctions de formatage
 command* command_formatting(char* user_prompt)
 {
-	// si CTRL-D
-	if(user_prompt == NULL)
-	{
-		return NULL;
-	}
-
 	// On enlève les espaces au début et à la fin
 	user_prompt = erase_whitespaces(user_prompt);
 
@@ -36,6 +28,16 @@ command* command_formatting(char* user_prompt)
 	formatted_command -> number_of_args = number_of_arguments;
 
 return formatted_command;
+}
+
+void free_command(command* user_command)
+{
+    for(int i = 0; i < user_command -> number_of_args; i++)
+    {
+        free(user_command -> arguments[i]);
+    }
+	free(user_command -> arguments);
+    free(user_command);
 }
 
 char* erase_whitespaces(char* user_prompt)
@@ -72,35 +74,99 @@ int get_number_of_arguments(char* user_prompt)
 	return number_of_arguments;
 }
 
+// renvoie les n derniers caractères d'une chaine de caracteres
+char* shorten_string(char* str, int n)
+{
+	// si chaine pas assez longue on renvoie la chaine telle quelle
+	if(n > strlen(str)) return str;
+
+	char* short_str = malloc(n + 1);
+	char* cursor = str + strlen(str);
+	int i;
+	for(i = 0; i < n; i++)
+	{
+		cursor--;
+	}
+	strcpy(short_str, cursor);
+	return short_str;
+}
+
+char* format_pwd(char* pwd, int pwd_max_length)
+{
+	char* formatted_pwd = shorten_string(pwd, pwd_max_length);
+	for(int i = 0; i < 3; i++)
+	{
+		formatted_pwd[i] = '.';
+	}
+
+	return formatted_pwd;
+}
+
 //affichage du prompt (a compléter)
 char* make_prompt(int result, char* pwd)
 {
-	char *prompt = malloc(MAX_CHAR_PROMPT);
-	//char *cop_pwd = pwd; // précaution au vu  
+	const char* red = "\033[91m";
+	const char* green = "\033[32m";
+	const char* blue = "\033[34m";
+	const char* default_color = "\033[00m";
 
-	//Gestion des 30 char
-	if(strlen(pwd) > MAX_CHAR_PROMPT - 5) {
-		char* new_pwd = malloc(26);
-  		strcpy(new_pwd, "...");
-  		strncat(new_pwd, pwd + (strlen(pwd) - 23) + 1, 26);
-  		pwd = new_pwd;
+	const char* start_tag = "\001";
+	const char* end_tag = "\002";
+
+	// calcul de la taille du prompt
+	const char* template = "[n]$ ";
+	const int template_size = strlen(template);
+	const int pwd_max_length = PROMPT_LENGTH - template_size;
+	int prompt_size = 0;
+	//taille des tags
+	prompt_size += NUMBER_OF_COLORS * 2;
+	//taille des codes couleur
+	prompt_size += NUMBER_OF_COLORS * strlen(default_color);
+	prompt_size += template_size;
+	prompt_size += pwd_max_length;
+
+	char* formatted_pwd;
+	if(strlen(pwd) > pwd_max_length) 
+	{
+		formatted_pwd = format_pwd(pwd, pwd_max_length);
 	}
-	//tentative avec couleur
-	switch (result) {
-	case 0:
-		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
-		break;
-	case 1 :
-		sprintf(prompt, "\001\033[91m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
-		break;
-	//Cas des SIGNAUX (A traiter)
-	//case : break;
+	else
+	{
+		formatted_pwd = malloc(pwd_max_length + 1);
+		strcpy(formatted_pwd, pwd);
+	}
 
+	// creation du prompt
+	char* prompt = calloc(prompt_size + 1, 1);
+	strcpy(prompt, start_tag);
+	// si commande précédente évaluée avec succès, couleur verte utilisée
+	if(!result) strcat(prompt, green);
+	// sinon, couleur rouge
+	else strcat(prompt, red);
+	strcat(prompt, end_tag);
 
-	default:
-		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
-		break;
-	}	
-	return prompt;
+	// Conversion du retour de la dernière commande en char*
+	// (enlever le nbre magique)
+	char result_str[3];
+	sprintf(result_str, "%d", result);
+
+	// code de retour entre crochets 
+	strcat(prompt, "[");
+	strcat(prompt, result_str);
+	strcat(prompt, "]");
+
+	// répertoire courant 
+	strcat(prompt, start_tag);
+	strcat(prompt, blue);
+	strcat(prompt, end_tag);
+	strcat(prompt, formatted_pwd);
+
+	strcat(prompt, start_tag);
+	strcat(prompt, default_color);
+	strcat(prompt, end_tag);
+	strcat(prompt, "$ "); 
+
+	free(formatted_pwd);
+
+return prompt;
 }
-
