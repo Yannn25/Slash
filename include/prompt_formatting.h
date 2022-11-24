@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "global.h"
 
 //Commande utilisateur
 typedef struct command
