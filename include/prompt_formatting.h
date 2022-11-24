@@ -1,8 +1,13 @@
 #ifndef PROMPT_FORMATTING_H
 #define PROMPT_FORMATTING_H
 
+// longueur du prompt slash
+#define PROMPT_LENGTH 30
+#define NUMBER_OF_COLORS 3
+
 // bibliothèques requises
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
@@ -18,5 +23,7 @@ command* command_formatting(char* prompt);
 char* make_prompt(int result, char* pwd);
 int get_number_of_arguments(char* user_prompt);
 char* erase_whitespaces(char* user_prompt);
+char* shorten_string(char* str, int n);
+char* format_pwd(char* pwd, int pwd_max_length);
 
 #endif
