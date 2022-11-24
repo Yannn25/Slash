@@ -70,10 +70,90 @@ int get_number_of_arguments(char* user_prompt)
 	return number_of_arguments;
 }
 
+// renvoie les n derniers caractères d'une chaine de caracteres
+char* shorten_string(char* str, int n)
+{
+	// si chaine pas assez longue on renvoie la chaine telle quelle
+	if(n > strlen(str)) return str;
+
+	char* cursor = str + strlen(str);
+	int i;
+	for(i = 0; i < n; i++)
+	{
+		cursor--;
+	}
+
+	return cursor;
+}
+
+char* format_pwd(char* pwd, int pwd_max_length)
+{
+	pwd = shorten_string(pwd, pwd_max_length);
+	for(int i = 0; i < 3; i++)
+	{
+		pwd[i] = '.';
+	}
+
+	return pwd;
+}
+
 //affichage du prompt (a compléter)
 char* make_prompt(int result, char* pwd)
 {
-	char* prompt;
+	const char* red = "\033[91m";
+	const char* green = "\033[32m";
+	const char* blue = "\033[34m";
+	const char* default_color = "\033[00m";
+
+	const char* start_tag = "\001";
+	const char* end_tag = "\002";
+
+	// calcul de la taille du prompt
+	const char* template = "[n]$ ";
+	const int template_size = strlen(template);
+	const int pwd_max_length = PROMPT_LENGTH - template_size;
+	int prompt_size = 0;
+	//taille des tags
+	prompt_size += NUMBER_OF_COLORS * 2;
+	//taille des codes couleur
+	prompt_size += NUMBER_OF_COLORS * strlen(default_color);
+	prompt_size += template_size;
+	prompt_size += pwd_max_length;
+
+	if(strlen(pwd) > pwd_max_length) 
+	{
+		pwd = format_pwd(pwd, pwd_max_length);
+	}
+
+	// creation du prompt
+	char* prompt = calloc(prompt_size + 1, 1);
+	strcpy(prompt, start_tag);
+	// si commande précédente évaluée avec succès, couleur verte utilisée
+	if(!result) strcat(prompt, green);
+	// sinon, couleur rouge
+	else strcat(prompt, red);
+	strcat(prompt, end_tag);
+
+	// Conversion du retour de la dernière commande en char*
+	// (enlever le nbre magique)
+	char result_str[3];
+	sprintf(result_str, "%d", result);
+
+	// code de retour entre crochets 
+	strcat(prompt, "[");
+	strcat(prompt, result_str);
+	strcat(prompt, "]");
+
+	// répertoire courant 
+	strcat(prompt, start_tag);
+	strcat(prompt, blue);
+	strcat(prompt, end_tag);
+	strcat(prompt, pwd);
+
+	strcat(prompt, start_tag);
+	strcat(prompt, default_color);
+	strcat(prompt, end_tag);
+	strcat(prompt, "$ "); 
 
 return prompt;
 }
