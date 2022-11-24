@@ -1,7 +1,8 @@
 #include "include/internal_functions.h"
 
+
 //Commandes disponibles dans slash
-const internal_command internal_commands[] = 
+const internal_command internal_commands[] =
 {
 	{"exit", &exit_slash},
 	{"cd", &cd_slash},
@@ -32,10 +33,15 @@ int execute(command* user_command)
 	return -1;
 }
 
+char last_pwd[256];
 //Commandes internes
 // à compléter
 int cd_slash(command* user_command)
 {
+	if(strcmp(last_pwd, "") == 0){
+		strcpy(last_pwd, logical_pwd);
+		printf("%s\n", last_pwd);
+	}
     // si trop d'arguments
 	int nb_args = user_command -> number_of_args;
 	if(nb_args > 3)
@@ -50,6 +56,12 @@ int cd_slash(command* user_command)
 	// cas par défaut (pas de paramètres)
     strcpy(option, "-L");
     strcpy(reference, getenv("HOME"));
+		if(nb_args == 1){
+			strcpy(logical_pwd, reference);
+			printf("commande : cd %s %s\n", option, reference);
+			printf("retour cd : %d\n", chdir(logical_pwd));
+			return 0;
+		}
 
 	// si un seul paramètre
 	if(nb_args == 2)
@@ -59,12 +71,23 @@ int cd_slash(command* user_command)
 		{
 		    strcpy(option, args[1]);
 		}
-        // si pas option -L (donc un chemin)
-        else if(strcmp(args[1], "-L") != 0)
-        {
+		// option - en argument
+		else if(strcmp(args[1], "-") == 0){
+			char inter[256];
+			strcpy(inter, logical_pwd);
+			strcpy(logical_pwd, last_pwd);
+			strcpy(last_pwd, inter);
+			printf("commande : cd -\n");
+			printf("retour cd : %d\n", chdir(logical_pwd));
+			return 0;
+		}
+	 // si pas option -L (donc un chemin)
+    else if(strcmp(args[1], "-L") != 0)
+      {
             strcpy(reference, args[1]);
         }
 	}
+
     // si 2 paramètres
 	else if(nb_args == 3)
 	{
@@ -77,61 +100,67 @@ int cd_slash(command* user_command)
 		// si option en dernier (ex : cd dir -P)
 		else printf("Too many arguments\n");
 	}
-	
+	strcpy(last_pwd, logical_pwd);
 	printf("commande : cd %s %s\n", option, reference);
 
+		char * token = strtok ( reference, "/" );
 
-    char symlink_path[256] = {0};
-    int ret = 0;
-    // -P
-    // cd physique, on met à jour pwd avec l'évaluation du path du symlink
-    // cd physique, pas ..
-    if(strcmp(option, "-P") == 0 && strcmp(reference, "..") != 0)
-    {
-        ret = readlink(reference, symlink_path, sizeof(symlink_path));
-        
-        strcat(logical_pwd, "/");
-        // si la reference est un symlink
-        if(ret != -1)
-        {
-            strcat(logical_pwd, symlink_path);
-        }
-        // si la reference n'est pas un symlink
-        else
-        {
-            strcat(logical_pwd, reference);
-        }
-    }
-    // cd logique, pas ..
-    else if(strcmp(option, "-L") == 0 && strcmp(reference, "..") != 0)
-    {
-        strcat(logical_pwd, "/");
-        strcat(logical_pwd, reference);
-    }
-    // cd logique, on met à jour pwd avec le nom du symlink
-    // si la ref est .., on chdir sur logical_pwd - readlink(symlink)
-    // cd logique, ..
-    if(strcmp(option, "-L") == 0 && strcmp(reference, "..") == 0)
-    {
-        // on supprime le dernier dossier du chemin logique
-        strcpy(logical_pwd, delete_last_folder(logical_pwd));
-    }
-    //cd physique, ..
-    if(strcmp(option, "-P") == 0 && strcmp(reference, "..") == 0)
-    {
-        ret = readlink(get_last_folder(logical_pwd), symlink_path, sizeof(symlink_path));
-        // S'il s'agit bien d'un symlink
-        if(ret != -1)
-        {
-            strcat(logical_pwd, "/");
-            strcat(logical_pwd, symlink_path);
-        }
-        // on supprime le dernier dossier du chemin logique (si symlink, dernier dossier évalué, sinon, dernier dossier)
-        strcpy(logical_pwd, delete_last_folder(logical_pwd));
-    }
+		while ( token != NULL ) {
+
+	    char symlink_path[256] = {0};
+	    int ret = 0;
+	    // -P
+	    // cd physique, on met à jour pwd avec l'évaluation du path du symlink
+	    // cd physique, pas ..
+	    if(strcmp(option, "-P") == 0 && strcmp(token, "..") != 0)
+	    {
+	        ret = readlink(token, symlink_path, sizeof(symlink_path));
+
+	        strcat(logical_pwd, "/");
+	        // si la reference est un symlink
+	        if(ret != -1)
+	        {
+	            strcat(logical_pwd, symlink_path);
+	        }
+	        // si la reference n'est pas un symlink
+	        else
+	        {
+	            strcat(logical_pwd, token);
+	        }
+	    }
+	    // cd logique, pas ..
+	    else if(strcmp(option, "-L") == 0 && strcmp(token, "..") != 0)
+	    {
+	        strcat(logical_pwd, "/");
+	        strcat(logical_pwd, token);
+	    }
+	    // cd logique, on met à jour pwd avec le nom du symlink
+	    // si la ref est .., on chdir sur logical_pwd - readlink(symlink)
+	    // cd logique, ..
+	    if(strcmp(option, "-L") == 0 && strcmp(token, "..") == 0)
+	    {
+	        // on supprime le dernier dossier du chemin logique
+	        strcpy(logical_pwd, delete_last_folder(logical_pwd));
+	    }
+	    //cd physique, ..
+	    if(strcmp(option, "-P") == 0 && strcmp(token, "..") == 0)
+	    {
+	        ret = readlink(get_last_folder(logical_pwd), symlink_path, sizeof(symlink_path));
+	        // S'il s'agit bien d'un symlink
+	        if(ret != -1)
+	        {
+	            strcat(logical_pwd, "/");
+	            strcat(logical_pwd, symlink_path);
+	        }
+	        // on supprime le dernier dossier du chemin logique (si symlink, dernier dossier évalué, sinon, dernier dossier)
+	        strcpy(logical_pwd, delete_last_folder(logical_pwd));
+	    }
+			token = strtok ( NULL, "/" );
+		}
+
 
 	printf("retour cd : %d\n", chdir(logical_pwd));
-    
+
     //strcpy(logical_pwd, update_pwd(logical_pwd, option, reference));
     //printf("getenv: %s\n", getenv("PWD"));
     //printf("logical_pwd : %s\n", logical_pwd);
@@ -230,4 +259,3 @@ int exit_slash(command* user_command)
 	// (à ajouter) tester la valeur de retour de strtol, gérer les cas où l'argument est invalide
 	exit(strtol(user_command -> arguments[1], NULL, 10));
 }
-
