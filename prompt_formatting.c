@@ -76,7 +76,7 @@ int get_number_of_arguments(char* user_prompt)
 char* make_prompt(int result, char* pwd)
 {
 	char *prompt = malloc(MAX_CHAR_PROMPT);
-	//char *cop_pwd = pwd; // précaution au vu  
+	//char *cop_pwd = pwd; // précaution au 
 
 	//Gestion des 30 char
 	if(strlen(pwd) > MAX_CHAR_PROMPT - 5) {
@@ -91,7 +91,7 @@ char* make_prompt(int result, char* pwd)
 		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
 		break;
 	case 1 :
-		sprintf(prompt, "\001\033[91m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
+		sprintf(prompt, "\001\033[91m\002[%d]\001\033[34m\002%s\001\033[00m\002$ ", result, pwd);
 		break;
 	//Cas des SIGNAUX (A traiter)
 	//case : break;

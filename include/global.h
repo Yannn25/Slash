@@ -8,5 +8,6 @@
 
 extern int last_return_value;
 extern char logical_pwd[MAX_PWD_LENGTH];
+extern char old_pwd[MAX_PWD_LENGTH];
 
 #endif

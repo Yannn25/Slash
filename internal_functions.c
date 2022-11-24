@@ -54,6 +54,10 @@ int cd_slash(command* user_command)
 	// si un seul paramètre
 	if(nb_args == 2)
 	{
+        //option - seul
+        if(strcmp(args[1], "-") == 0) {
+            strcpy(reference, getenv("OLDPWD"));
+        }
 		// option -P en argument
 		if(strcmp(args[1], "-P") == 0)
 		{
@@ -83,6 +87,11 @@ int cd_slash(command* user_command)
 
     char symlink_path[256] = {0};
     int ret = 0;
+
+
+
+    
+
     // -P
     // cd physique, on met à jour pwd avec l'évaluation du path du symlink
     // cd physique, pas ..
@@ -176,6 +185,10 @@ char* update_pwd(char* pwd, char* option, char* reference)
     }
 
     return pwd;
+}
+
+char *update_old_pwd() {
+
 }
 
 //à compléter
