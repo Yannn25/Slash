@@ -93,6 +93,9 @@ char* make_prompt(int result, char* pwd)
 	case 1 :
 		sprintf(prompt, "\001\033[91m\002[%d]\001\033[34m\002%s\001\033[00m\002$ ", result, pwd);
 		break;
+	case -1 :
+		sprintf(prompt, "\001\033[91m\002[%d]\001\033[34m\002%s\001\033[00m\002$ ", result, pwd);
+		break;
 	//Cas des SIGNAUX (A traiter)
 	//case : break;
 
