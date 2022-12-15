@@ -107,4 +107,3 @@ char** path_parser(char* path)
     free(path_cursor);
     return directories;
 }
-

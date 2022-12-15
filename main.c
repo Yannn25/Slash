@@ -12,8 +12,6 @@
 int last_return_value = 0;
 char old_logical_pwd[MAX_PWD_LENGTH] = {0};
 char logical_pwd[MAX_PWD_LENGTH] = {0};
-char old_pwd[MAX_PWD_LENGTH] = {0};
-command* user_command;
 
 int main(void) 
 {
@@ -27,10 +25,19 @@ int main(void)
 	while(1)
 	{
 		// Prompt Slash
-		char* prompt = readline(make_prompt(last_return_value,logical_pwd));
-		//char* prompt = readline("$> ");
-		if(strlen(prompt) > 0)
-			add_history(prompt);
+		char* slash_prompt = make_prompt(last_return_value, logical_pwd);
+		char* user_prompt;
+		// tant qu'on nous fournit des lignes blanches, on continue à afficher le prompt
+		do
+		{
+			// Si la commande est vide (Ctrl - D)
+			if((user_prompt = readline(slash_prompt)) == NULL)
+			{
+				free(slash_prompt);
+				exit(0);
+			}
+		}while((strlen(erase_whitespaces(user_prompt)) == 0));
+		add_history(user_prompt);
 
 		//On vérifie si l'utilisateur a saisi une commande interne
 		command* user_command = command_formatting(user_prompt);
@@ -38,7 +45,6 @@ int main(void)
 		free(user_prompt);
 		// Lancement de la commande utilisateur
 		last_return_value = execute(user_command);
-		
 
 		/* Sinon, on vérifie si l'utilisateur a saisi une commande externe
 		(à mettre plutot dans la fct execute)
@@ -53,4 +59,3 @@ int main(void)
 
 return 0;
 }
-
