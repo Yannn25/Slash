@@ -73,7 +73,7 @@ int get_number_of_arguments(char* user_prompt)
 }
 
 //affichage du prompt (a compléter)
-char* make_prompt(int result, char* pwd)
+char* make_promptV1(int result, char* pwd)
 {
 	char *prompt = malloc(MAX_CHAR_PROMPT);
 	//char *cop_pwd = pwd; // précaution au 
