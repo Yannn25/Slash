@@ -4,9 +4,9 @@
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
 #define MAX_PWD_LENGTH 256
-#define MAX_CHAR_PROMPT 30
 
 extern int last_return_value;
+extern char old_logical_pwd[MAX_PWD_LENGTH];
 extern char logical_pwd[MAX_PWD_LENGTH];
 extern char old_pwd[MAX_PWD_LENGTH];
 

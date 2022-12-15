@@ -9,7 +9,8 @@
 #include "include/global.h"
 
 // paramètrage des variables globales
-int last_return_value = 0;//mettre a 1 pour tester l'affichage du prompt avec erreur
+int last_return_value = 0;
+char old_logical_pwd[MAX_PWD_LENGTH] = {0};
 char logical_pwd[MAX_PWD_LENGTH] = {0};
 char old_pwd[MAX_PWD_LENGTH] = {0};
 command* user_command;
@@ -19,6 +20,7 @@ int main(void)
 	// initialisation
 	int proc;
 	rl_outstream = stderr;
+	strcpy(old_logical_pwd, getenv("OLDPWD"));
 	strcpy(logical_pwd, getenv("PWD"));
 
 	// boucle principale
@@ -31,7 +33,9 @@ int main(void)
 			add_history(prompt);
 
 		//On vérifie si l'utilisateur a saisi une commande interne
-		user_command = command_formatting(prompt);
+		command* user_command = command_formatting(user_prompt);
+		free(slash_prompt);
+		free(user_prompt);
 		// Lancement de la commande utilisateur
 		last_return_value = execute(user_command);
 		
@@ -40,10 +44,10 @@ int main(void)
 		(à mettre plutot dans la fct execute)
 		if((proc = fork()) == 0)
 		{
-			execl("/bin/pwd", "pwd", NULL);
+			execvp(...)
 		}
 		*/
-		
+
 		// si ni l'un ni l'autre, message d'erreur et on boucle
 	}
 
