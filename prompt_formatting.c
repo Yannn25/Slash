@@ -103,38 +103,39 @@ char* format_pwd(char* pwd, int pwd_max_length)
 }
 
 //affichage du prompt (a compléter)
-char* make_prompt(int result, char* pwd)
+char* make_promptV1(int result, char* pwd)
 {
-	const char* red = "\033[91m";
-	const char* green = "\033[32m";
-	const char* blue = "\033[34m";
-	const char* default_color = "\033[00m";
+	char *prompt = malloc(MAX_CHAR_PROMPT);
+	//char *cop_pwd = pwd; // précaution au 
 
-	const char* start_tag = "\001";
-	const char* end_tag = "\002";
-
-	// calcul de la taille du prompt
-	const char* template = "[n]$ ";
-	const int template_size = strlen(template);
-	const int pwd_max_length = PROMPT_LENGTH - template_size;
-	int prompt_size = 0;
-	//taille des tags
-	prompt_size += NUMBER_OF_COLORS * 2;
-	//taille des codes couleur
-	prompt_size += NUMBER_OF_COLORS * strlen(default_color);
-	prompt_size += template_size;
-	prompt_size += pwd_max_length;
-
-	char* formatted_pwd;
-	if(strlen(pwd) > pwd_max_length) 
-	{
-		formatted_pwd = format_pwd(pwd, pwd_max_length);
+	//Gestion des 30 char
+	if(strlen(pwd) > MAX_CHAR_PROMPT - 5) {
+		char* new_pwd = malloc(26);
+  		strcpy(new_pwd, "...");
+  		strncat(new_pwd, pwd + (strlen(pwd) - 23) + 1, 26);
+  		pwd = new_pwd;
 	}
-	else
-	{
-		formatted_pwd = malloc(pwd_max_length + 1);
-		strcpy(formatted_pwd, pwd);
-	}
+	//tentative avec couleur
+	switch (result) {
+	case 0:
+		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
+		break;
+	case 1 :
+		sprintf(prompt, "\001\033[91m\002[%d]\001\033[34m\002%s\001\033[00m\002$ ", result, pwd);
+		break;
+	case -1 :
+		sprintf(prompt, "\001\033[91m\002[%d]\001\033[34m\002%s\001\033[00m\002$ ", result, pwd);
+		break;
+	//Cas des SIGNAUX (A traiter)
+	//case : break;
+
+
+	default:
+		sprintf(prompt, "\001\033[32m\002[%d]\001\033[36m\002%s\001\033[00m\002$ ", result, pwd);
+		break;
+	}	
+	return prompt;
+}
 
 	// creation du prompt
 	char* prompt = calloc(prompt_size + 1, 1);

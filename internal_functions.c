@@ -60,6 +60,12 @@ int cd_slash(command* user_command)
 	// si un seul paramètre
 	if(nb_args == 2)
 	{
+        //option - seul
+        if(strcmp(args[1], "-") == 0) {
+            strcpy(option, "-");
+           // strcpy(reference, getenv("OLDPWD"));
+           strcpy(reference,old_pwd);
+        }
 		// option -P en argument
 		if(strcmp(args[1], "-P") == 0)
 		{
@@ -87,33 +93,26 @@ int cd_slash(command* user_command)
             return 1;
         }
 	}
+	
+	printf("commande : cd %s %s\n", option, reference);
+    printf("getenv oldpwd : %s\n", getenv("OLDPWD"));
 
-    // Si - passé en argument, on remplace la reference par l'ancien pwd
-    if(strcmp(reference, "-") == 0)
-    {
-        strcpy(reference, old_logical_pwd);
+    char symlink_path[256] = {0};
+    int ret = 0;
+
+    //cd - et maj de oldpwd
+    if (strcmp(option, "-") == 0) {
+        strcpy(reference, getenv("OLDPWD"));
+        strcpy(logical_pwd,reference);
+        printf("%s", reference);
     }
 
-    //printf("ref : %s\n", reference);
+    
 
-    // On parse la liste des dossiers passés en référence
-    int nbre_repertoires = get_number_of_directories(reference);
-    char** entries = path_parser(reference);
-    char* new_logical_pwd = NULL;
-
-    /*
-    printf("nbre repertoires : %d\n", nbre_repertoires);
-    for(int k = 0; k < nbre_repertoires; k++)
-    {
-        printf("repertoire %d : %s\n", k, entries[k]);
-    }
-    */
-
-    // A refactoriser de toute urgence 
-
-    int chdir_return = 0;
-    //si option L, cd sur chemin logique
-    if(strcmp(option, "-L") == 0)
+    // -P
+    // cd physique, on met à jour pwd avec l'évaluation du path du symlink
+    // cd physique, pas ..
+    if(strcmp(option, "-P") == 0 && strcmp(reference, "..") != 0)
     {
         // si reference absolue, on effectue la procédure standard à partir de la racine
         if(*reference == '/')
@@ -138,8 +137,24 @@ int cd_slash(command* user_command)
             return 0;
         }
     }
-    // si option P ou chdir précédent a échoué, chdir sur chemin physique
-    if(strcmp(option, "-P") == 0 || chdir_return == -1)
+    
+
+    // cd logique, pas ..
+    else if(strcmp(option, "-L") == 0 && strcmp(reference, "..") != 0)
+    {
+        strcat(logical_pwd, "/");
+        strcat(logical_pwd, reference);
+    }
+    // cd logique, on met à jour pwd avec le nom du symlink
+    // si la ref est .., on chdir sur logical_pwd - readlink(symlink)
+    // cd logique, ..
+    if(strcmp(option, "-L") == 0 && strcmp(reference, "..") == 0)
+    {
+        // on supprime le dernier dossier du chemin logique
+        strcpy(logical_pwd, delete_last_folder(logical_pwd));
+    }
+    //cd physique, ..
+    if(strcmp(option, "-P") == 0 && strcmp(reference, "..") == 0)
     {
         char physical_cwd[256];
         char* new_logical_pwd;
@@ -202,8 +217,58 @@ int cd_slash(command* user_command)
             free(new_logical_pwd);
         }
     }
-    free(new_logical_pwd);
+
+	printf("retour cd : %d\n", chdir(logical_pwd));
+
+    
+    //strcpy(logical_pwd, update_pwd(logical_pwd, option, reference));
+    //printf("getenv: %s\n", getenv("PWD"));
+    //printf("logical_pwd : %s\n", logical_pwd);
+
 	return 0;
+}
+
+/* Convertit le dernier dossier du chemin en son chemin physique si c'est un symlink
+char* last_folder_conversion(char* logical_pwd)
+{
+    à faire (?)
+}
+*/
+
+// Supprime le dernier dossier du chemin logique
+char* delete_last_folder(char* logical_pwd)
+{
+        char* pwd_end = logical_pwd + strlen(logical_pwd) -1;
+        while(*pwd_end != '/') pwd_end--;
+        *(pwd_end) = '\0';
+        return logical_pwd;
+}
+
+
+char* get_last_folder(char* logical_pwd)
+{
+    char* last_folder = logical_pwd + strlen(logical_pwd) - 1;
+    while(*last_folder != '/') last_folder--;
+    return (last_folder + 1);
+}
+
+// met à jour le chemin logique en fonction des cd_slash() effectués
+char* update_pwd(char* pwd, char* option, char* reference)
+{
+    // si on recule d'un dossier, on efface le dernier dossier du chemin logique
+    if(strcmp(reference, "..") == 0)
+    {
+
+        char* pwd_end = pwd + strlen(pwd) -1;
+        while(*pwd_end != '/') pwd_end--;
+        *(pwd_end) = '\0';
+    }
+
+    return pwd;
+}
+
+char *update_old_pwd() {
+
 }
 
 //à compléter
