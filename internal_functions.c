@@ -157,7 +157,7 @@ int cd_slash(command* user_command)
                     free(entries[k]);
                 }
                 free(entries);
-                free(new_logical_pwd);
+                //free(new_logical_pwd);
                 return 0;
             }
             else
@@ -177,7 +177,7 @@ int cd_slash(command* user_command)
         // si chdir chemin physique échoue, alors repertoire inexistant
         if(chdir(new_logical_pwd) == -1)
         { 
-            printf("cd: No such file or directory\n");
+            printf("cd: No such file or directory : %s\n", reference);
             for(int k = 0; k < nbre_repertoires; k++)
             {
                 free(entries[k]);
@@ -260,4 +260,3 @@ int exit_slash(command* user_command)
     free_command(user_command);
 	exit(exit_value);
 }
-
