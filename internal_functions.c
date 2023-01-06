@@ -25,7 +25,9 @@ int execute(command* user_command)
             // libération de la mémoire
             free_command(user_command);
             return result;
-		}
+		//} else {
+          //  result = execlp(user_command -> arguments[0], user_command -> arguments[0],NULL);
+        }
 	}
 
     for(int j = 0; j < user_command -> number_of_args; j++)
@@ -251,12 +253,14 @@ int exit_slash(command* user_command)
     // pas d'argument, valeur par défaut renvoyée
     if(nb_args == 1)
     {
+        printf("%d\n",last_return_value);
         free_command(user_command);
         exit(last_return_value);
     }
 
 	// (à ajouter) tester la valeur de retour de strtol, gérer les cas où l'argument est invalide
     int exit_value = strtol(user_command -> arguments[1], NULL, 10);
+    printf("%d\n",exit_value);
     free_command(user_command);
 	exit(exit_value);
 }
