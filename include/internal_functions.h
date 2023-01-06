@@ -4,6 +4,7 @@
 // bibliothèques requises
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #include "prompt_formatting.h"
 #include "path_formatting.h"
 #include "global.h"
@@ -21,5 +22,7 @@ int execute(command*);
 int cd_slash(command*);
 int pwd_slash(command*);
 int exit_slash(command*);
+
+int execute_extern(command*);
 
 #endif
