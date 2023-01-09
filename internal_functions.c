@@ -16,6 +16,7 @@ int execute(command* user_command)
 {
 	int i;
     int result = 0;
+    int flags = 25;//flag qui nous permet de savoir si une commande interne a été executer
 	for(i = 0; i < number_of_internal_commands; i++)
 	{
 		if(strcmp(user_command -> arguments[0], internal_commands[i].command_name) == 0)
@@ -24,10 +25,16 @@ int execute(command* user_command)
 			result = (*(internal_commands[i].internal_function))(user_command);
             // libération de la mémoire
             free_command(user_command);
+            flags = 0;
             return result;
-		}
+		
+
+        }
 	}
 
+    if(flags  == 25)
+        return execute_extern(user_command);   
+            
     for(int j = 0; j < user_command -> number_of_args; j++)
     {
         free(user_command -> arguments[j]);
@@ -251,12 +258,57 @@ int exit_slash(command* user_command)
     // pas d'argument, valeur par défaut renvoyée
     if(nb_args == 1)
     {
+        printf("%d\n",last_return_value);
         free_command(user_command);
         exit(last_return_value);
     }
 
 	// (à ajouter) tester la valeur de retour de strtol, gérer les cas où l'argument est invalide
     int exit_value = strtol(user_command -> arguments[1], NULL, 10);
+    printf("%d\n",exit_value);
     free_command(user_command);
 	exit(exit_value);
+}
+
+
+int execute_extern(command* user_command) {
+    printf("J'ai été executer !! \n");
+    int result = 0;
+    int pid;
+    char *tab_arg [user_command -> number_of_args];//+2 pour le NULL et la cmd placer en début de tableau
+    tab_arg[0] = user_command->arguments[0];
+    printf("tab[0] : %s\n et nb d'arg : %d\n",tab_arg[0],user_command->number_of_args);
+    for(int i = 1; i < user_command -> number_of_args; i++) { 
+        tab_arg[i] = user_command -> arguments[i];
+       // printf("tab[i:%d] : %s\n",i,tab_arg[i]);
+    }
+    tab_arg[user_command -> number_of_args ] = "NULL";
+    // for(int j = 0; j < user_command -> number_of_args; j++) {
+    //     printf("tab[j:%d] : %s\n",j,tab_arg[j]);
+    // }     
+    switch (pid = fork()) {
+        case -1:
+            fprintf(stderr, "Fork() error: %s\n", strerror(errno));
+            return -1;
+        case 0:
+            result = execlp(user_command -> arguments[0], *tab_arg,NULL);
+            if(result == -1) {
+                //printf("Error in external command [%s]\n",user_command->arguments[0]);
+                //perror("Execvp \n");
+                fprintf(stderr, "Execvp error: %s\n", strerror(errno));
+                return -1;
+            }
+        default:
+            int status;
+            waitpid(pid, &status, 0);
+            break;
+    }
+    
+    for(int j = 0; j < user_command -> number_of_args; j++)
+    {
+        free(user_command -> arguments[j]);
+    }
+    free(user_command);
+    return result;
+    
 }

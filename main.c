@@ -46,13 +46,13 @@ int main(void)
 		// Lancement de la commande utilisateur
 		last_return_value = execute(user_command);
 
-		/* Sinon, on vérifie si l'utilisateur a saisi une commande externe
-		(à mettre plutot dans la fct execute)
-		if((proc = fork()) == 0)
-		{
-			execvp(...)
-		}
-		*/
+		//Sinon, on vérifie si l'utilisateur a saisi une commande externe
+		//(à mettre plutot dans la fct execute)
+		/*if((proc = fork()) == 0) {
+			last_return_value = execlp(user_command -> arguments[0], user_command -> arguments[0],NULL);
+            free(user_command);
+		}*/
+		
 
 		// si ni l'un ni l'autre, message d'erreur et on boucle
 	}
