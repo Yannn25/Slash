@@ -46,7 +46,6 @@ int execute(command* user_command)
 
 
 //Commandes internes
-// à compléter
 int cd_slash(command* user_command)
 {
     // si trop d'arguments
@@ -101,20 +100,12 @@ int cd_slash(command* user_command)
         strcpy(reference, old_logical_pwd);
     }
 
-    //printf("ref : %s\n", reference);
 
     // On parse la liste des dossiers passés en référence
     int nbre_repertoires = get_number_of_directories(reference);
     char** entries = path_parser(reference);
     char* new_logical_pwd = NULL;
 
-    /*
-    printf("nbre repertoires : %d\n", nbre_repertoires);
-    for(int k = 0; k < nbre_repertoires; k++)
-    {
-        printf("repertoire %d : %s\n", k, entries[k]);
-    }
-    */
 
     // A refactoriser de toute urgence 
 
@@ -164,7 +155,6 @@ int cd_slash(command* user_command)
                     free(entries[k]);
                 }
                 free(entries);
-                //free(new_logical_pwd);
                 return 0;
             }
             else
@@ -213,7 +203,7 @@ int cd_slash(command* user_command)
 	return 0;
 }
 
-//à compléter
+
 int pwd_slash(command* user_command)
 {
 	//trop d'arguments
@@ -272,43 +262,37 @@ int exit_slash(command* user_command)
 
 
 int execute_extern(command* user_command) {
-    printf("J'ai été executer !! \n");
-    int result = 0;
+   int result = 0;
     int pid;
-    char *tab_arg [user_command -> number_of_args];//+2 pour le NULL et la cmd placer en début de tableau
+    char** tab_arg = malloc((user_command->number_of_args + 1) * sizeof(char*));
     tab_arg[0] = user_command->arguments[0];
-    printf("tab[0] : %s\n et nb d'arg : %d\n",tab_arg[0],user_command->number_of_args);
-    for(int i = 1; i < user_command -> number_of_args; i++) { 
-        tab_arg[i] = user_command -> arguments[i];
-       // printf("tab[i:%d] : %s\n",i,tab_arg[i]);
+
+    for (int i = 1; i < user_command->number_of_args; i++) {
+        tab_arg[i] = user_command->arguments[i];
     }
-    tab_arg[user_command -> number_of_args ] = "NULL";
-    // for(int j = 0; j < user_command -> number_of_args; j++) {
-    //     printf("tab[j:%d] : %s\n",j,tab_arg[j]);
-    // }     
+    tab_arg[user_command->number_of_args] = NULL;
+
     switch (pid = fork()) {
         case -1:
             fprintf(stderr, "Fork() error: %s\n", strerror(errno));
-            return -1;
+            result = -1;
+            break;
         case 0:
-            result = execlp(user_command -> arguments[0], *tab_arg,NULL);
+            result = execvp(tab_arg[0], tab_arg);
             if(result == -1) {
-                //printf("Error in external command [%s]\n",user_command->arguments[0]);
-                //perror("Execvp \n");
                 fprintf(stderr, "Execvp error: %s\n", strerror(errno));
-                return -1;
+                exit(-1);
             }
         default:
             int status;
-            waitpid(pid, &status, 0);
-            break;
+            waitpid(pid, &status, WEXITED);
+            break;;
     }
     
-    for(int j = 0; j < user_command -> number_of_args; j++)
-    {
+    for(int j = 0; j < user_command -> number_of_args; j++) {
         free(user_command -> arguments[j]);
     }
     free(user_command);
+    free(tab_arg);
     return result;
-    
 }
